@@ -1,0 +1,23 @@
+{% load static %}
+<html>
+<head>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'css/bootstrap.css' %}"
+/>
+</head>
+<body>
+	<div class="container">
+		<h1>Add an rss link</h1>
+		<form action="rss/" method="post">
+		  {% csrf_token %}
+		  <div class="mb-3">
+			<label for="link" class="form-label">Link</label>
+			<input type="link" class="form-control" name="link">
+		  </div>
+		  <button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+	</div>
+	
+</body>
