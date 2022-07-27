@@ -1,0 +1,10 @@
+
+
+<table border="1">
+{% for item in items %}
+<tr>
+<td>{{ item.title.text }}</td>
+<td>{{ item.description.text }}</td>
+</tr>
+{% endfor %}
+</table>
