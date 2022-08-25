@@ -1,16 +1,28 @@
-{% load static %}
+<!-- {% load static %} -->
 <html>
 <head>
-<link
-  rel="stylesheet"
-  type="text/css"
-  href="{% static 'css/bootstrap.css' %}"
-/>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous">
+	</script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous">
+	</script>
+		
 </head>
+<style>
+    .not-visible {
+        display: none;
+    }
+</style>
 <body>
 	<div class="container">
-		<p>From {{ link }}</p>
-		<div class="container-fluid">
+		<div class="container-fluid mt-3">
 			<table class="table">
 				<thead class="thead-dark">
 					<tr>
@@ -19,16 +31,79 @@
 						<th scope="col">Description</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="content">
 					{% for item in items %}
-					<tr>
+					<tr class="single_content">
 						<th scope="row">{{ forloop.counter }}</th>
 						<td>{{ item.title | safe }}</td>
 						<td>{{ item.description |safe }}</td>
 					</tr>
 					{% endfor %}
 				</tbody>
-			</table>
+		 	</table>
+			<div class="d-flex justify-content-center">
+				<div class="spinner-border text-primary mt-2 not-visible" role="status" id="spinner">
+					<span class="sr-only">Loading...</span>
+				</div>
+				<div class="load-more__btn mt-3" id="btn">
+					<button type="button" class="btn btn-success">Load More Jobs</button>
+				</div>
+				<div class="alert alert-danger mt-2 not-visible" role="alert" id='alert'>
+					No more job to load!!
+				</div>
+			</div>
+			
 		</div>
-	</div>
+		{{total_obj|json_script:"json-total"}}
+		<script>
+        const loadBtn = document.getElementById('btn');
+        const spinner = document.getElementById('spinner');
+        const total = JSON.parse(document.getElementById('json-total').textContent);
+        const alert = document.getElementById('alert');
+
+        function loadmoreJobs() {
+            var _current_item = $('.single_content').length;
+			var _current_page = $('.single_content').length/30;
+			console.log(_current_page);
+            const content_container = document.getElementById('content');
+            $.ajax({
+                url: '{% url "load" %}',
+                type: 'POST',
+                data: {
+                    'offset': _current_page,
+					csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                beforeSend: function () {
+                    loadBtn.classList.add('not-visible');
+                    spinner.classList.remove('not-visible');
+                },
+                success: function (response) {
+                    const data = response.items
+                    spinner.classList.add('not-visible')
+					var i = 1
+                    data.map(item => {
+                        console.log(item.title);
+                        content_container.innerHTML += `<tr class="single_content">
+															<th scope="row">${i + _current_page*30}</th>
+                                                            <td>${item.title}</td>
+                                                            <td>${item.description}</td>
+                                                        </tr>`;
+						i++;
+                    })
+                    if (_current_item == total) {
+                        alert.classList.remove('not-visible');
+                    } else {
+                        loadBtn.classList.remove('not-visible');
+                    }
+                },
+                error: function (err) {
+                    console.log(err);
+                },
+            });
+        }
+        loadBtn.addEventListener('click', () => {
+            loadmoreJobs()
+        });
+    </script> 
 </body>
+<html>
