@@ -5,6 +5,6 @@ from django.conf import settings
 
 urlpatterns = [
     path('', views.index, name='index'),
-	path('form/', views.form, name='form'),
-	path('form/rss/', views.rss, name='rss'),
-] 
+	path('rss/', views.rss, name='rss'),
+    path('rss/load', views.load, name='load')
+]
